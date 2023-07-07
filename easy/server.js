@@ -15,8 +15,15 @@ let ADMIN = [
     }
 ]
 let COURSES = [];
-let USERS = [];
+let USERS = [
+    {
+        username:"barath@gmail.com",
+        password:"itunes@1921"
+    }
+];
 
+
+// admin
 
 // middleware for admin authentication
 const adminAuthentication = (req,res,next) => {
@@ -55,19 +62,12 @@ app.get("/admin/login",adminAuthentication,(req,res)=>{
 })
 
 app.post("/admin/courses",adminAuthentication,(req,res)=>{
-    const course_input = req.body;
+    const course_input = {...req.body,courseid:COURSES.length +1};
     const flag = COURSES.find(c => c.title === course_input.title)
     if (flag){
         res.status(403).json({message:"course already exixts"})
     }else{
-        COURSES.push({
-            title:course_input.title,
-            description:course_input.description,
-            price:course_input.price,
-            imageLink:course_input.imageLink,
-            publication:course_input.publication,
-            courseid:COURSES.length + 1
-        })
+        COURSES.push(course_input)
         res.status(200).json({message:"course created successfully: courseid:"})
     }
 })
@@ -91,19 +91,70 @@ app.post("/admin/signup",(req,res)=>{
 app.put("/admin/courses/:courseid",adminAuthentication,(req,res)=>{
     const courseid = req.params.courseid;
     const updated_course = req.body
-    for(i=0;i<COURSES.length;i++){
-        if (COURSES[i].courseid == courseid){
-            COURSES[i].title = updated_course.title
-            COURSES[i].description = updated_course.description;
-            COURSES[i].price = updated_course.price;
-            COURSES[i].imageLink = updated_course.imageLink
-            COURSES[i].publication = updated_course.publication
-            res.status(200).json({message:"Courses updated successfully"})
-        }
+    const flag = COURSES.find(c => c.id == courseid);
+    if (flag){
+        Object.assign(flag,updated_course)
+    }else{
+        res.status(403).json({message:"Course not found with given id"})
     }
-    res.status(403).json({message:"Course not found with given id"})
 })
 
+
+// users
+
+const userAuthentication = (req,res,next) =>{
+    const { username,password } = req.headers
+    const user = USERS.find(u => u.username === username && u.password === password);
+    if(user){
+        req.user = user;
+        next();
+    }else{
+        res.status(403).json({message:"Admin Authentication Failed"});
+    }
+}
+
+app.post("/users/signup",(req,res)=>{
+    const user = {...req.body,purchasedCourse: []}
+    const flag = USERS.find(u => u.username === user.username);
+    if (flag){
+        res.status(403).json({message:"User account already exists"});
+    }else{
+        USERS.push(user)
+        res.status(200).json({message:"User account created successfully"});
+    }
+})
+
+
+app.post("/users/login",userAuthentication,(req,res)=>{
+    res.status(200).json({message:"user login successful"});
+})
+
+app.post("/users/courses",userAuthentication,(req,res)=>{
+    const courses = COURSES.filter(c=>c.published)
+    res.status(200).json(courses)
+})
+
+app.post("/users/courses/:courseid",userAuthentication,(req,res)=>{
+    const courseid = req.params.courseid;
+    const course = COURSES.find(c => c.courseid === courseid && c.published)
+    if(course){
+        req.user.purchasedCourse.push(courseid)
+        res.status(200).json({message:"Course puschased.."})
+    }else{
+        res.status(404).json({message:"Unable to purchase course"})
+    }
+})
+
+app.get("/users/purchasedCourses",userAuthentication,(req,res)=>{
+    const purchasedCourseids = req.user.purchasedCourse;
+    let purchasedCourses = [];
+    for (i=0;i<COURSES.length;i++){
+        if(purchasedCourseids.indexOf(COURSES[i].courseid) !== -1){
+            purchasedCourses.push(COURSES[i])
+        }
+    }
+    res.json(purchasedCourses)
+})
 app.listen(PORT,()=>{
     console.log("server started in port -> "+PORT)
 })
