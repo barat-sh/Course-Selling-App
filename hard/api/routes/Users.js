@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
 
 router.use(express.json())
-require('dotenv').config();
 
 // secret key for jwt
 
