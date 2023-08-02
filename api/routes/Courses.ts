@@ -64,7 +64,29 @@ router.post("/add",adminVerifyToken,async(req,res): Promise<void>=>{
             res.status(404).json({message:"Error while adding new course...",error})
         }
     }
-    
+})
+
+// delete course -> admin access
+router.delete("/delete",adminVerifyToken,async(req,res)=>{
+    const {title,description,price,imageLink,published} = req.body;
+    const alreadyExists = await Course.findOne({title})
+    if (alreadyExists){
+        try{
+            const deletedCourse = await Course.deleteOne({_id: new Object(alreadyExists.id)})
+            res.status(200).json({message:"Course deleted...",deletedCourse})
+        }catch(error){
+            res.status(404).json({message:"internal error",error})
+        }
+    }else{
+        res.status(403).json({message:"Course not found..."})
+    }
+    // Course.deleteOne({title},(err:any): void=>{
+    //     if (err){
+    //         res.status(403).json({message:"Error while deleting course.."})
+    //     }else{
+    //         res.status(200).json({message:"Course Deleted..."})
+    //     }
+    // })
 })
 
 export default router;

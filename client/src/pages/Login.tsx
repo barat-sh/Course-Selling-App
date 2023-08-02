@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import loginIcon from "./assets/fingerprint-solid.svg";
-import axios from "axios";
+// import axios from "axios";
 
 export const Login = () => {
     const [username,setUsername] = useState("");
     const [password,setPassword] = useState("");
     const navigate = useNavigate();
+    
     return (
       <>
         <div className="flex min-h-full flex-1 flex-col justify-center mt-12 px-6 py-12 lg:px-8">
@@ -70,21 +71,20 @@ export const Login = () => {
               <div>
                 <button
                   className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  onClick={()=>{
-                    if (username === "" || password === ""){
-                        console.log("Invalid username or password.")
-                        return;
+                  onClick={async()=>{
+                    const user = {
+                      username:username,
+                      password:password
                     }
-                    interface userLogin{
-                      username:string,
-                      password:string
-                    }
-                    const apiurl:string = "http://localhost:3001/user/login/"
-                    const loginData:userLogin = {
-                      username:"barath@gmail.com",
-                      password:"itunes@1921"
-                    }
-                    
+                    const response =await fetch("http://localhost:3001/user/login",{
+                      method:"POST",
+                      body:JSON.stringify(user),
+                      headers:{
+                        "Content-type":"application/json"
+                      }
+                    })
+                    const loginResponse = await response.json()
+                    console.log(loginResponse)
                   }}
                 >
                   Sign in
@@ -105,4 +105,3 @@ export const Login = () => {
       </>
     )
   }
-  

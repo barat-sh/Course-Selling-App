@@ -80,4 +80,28 @@ router.post("/add", adminVerifyToken, (req, res) => __awaiter(void 0, void 0, vo
         }
     }
 }));
+// delete course -> admin access
+router.delete("/delete", adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { title, description, price, imageLink, published } = req.body;
+    const alreadyExists = yield db_1.Course.findOne({ title });
+    if (alreadyExists) {
+        try {
+            const deletedCourse = yield db_1.Course.deleteOne({ _id: new Object(alreadyExists.id) });
+            res.status(200).json({ message: "Course deleted...", deletedCourse });
+        }
+        catch (error) {
+            res.status(404).json({ message: "internal error", error });
+        }
+    }
+    else {
+        res.status(403).json({ message: "Course not found..." });
+    }
+    // Course.deleteOne({title},(err:any): void=>{
+    //     if (err){
+    //         res.status(403).json({message:"Error while deleting course.."})
+    //     }else{
+    //         res.status(200).json({message:"Course Deleted..."})
+    //     }
+    // })
+}));
 exports.default = router;
