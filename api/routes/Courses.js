@@ -13,49 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = express_1.default.Router();
 const adminSecret_key = "admins3cr3tf0rjs0nw3bt0k3n";
 const userSecret_key = "users3cr3tf0rjs0nw3bt0k3n";
 // importing database
 const db_1 = require("../models/db");
-// admin verification token
-const adminVerifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers;
-    try {
-        const isMatch = yield jsonwebtoken_1.default.verify(token, adminSecret_key);
-        return isMatch;
-    }
-    catch (error) {
-        console.log("Error while creating token");
-        return false;
-    }
-    finally {
-        next();
-    }
-});
-// user verification token
-const userVerifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers;
-    try {
-        const isMatch = yield jsonwebtoken_1.default.verify(token, userSecret_key);
-        return isMatch;
-    }
-    catch (error) {
-        console.log("Error while creating token");
-        return false;
-    }
-    finally {
-        next();
-    }
-});
+// importing auths
+const auth_1 = require("../auth");
 // list all course -> user & admin access
-router.get("/list", userVerifyToken || adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/list", auth_1.userVerifyToken || auth_1.adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const listofCourses = yield db_1.Course.find();
     res.status(200).json({ message: "Success", listofCourses });
 }));
 // add new Course -> admin access
-router.post("/add", adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/add", auth_1.adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, description, price, imageLink, published } = req.body;
     const alreadyExists = yield db_1.Course.findOne({ description });
     if (alreadyExists) {
@@ -81,7 +52,7 @@ router.post("/add", adminVerifyToken, (req, res) => __awaiter(void 0, void 0, vo
     }
 }));
 // delete course -> admin access
-router.delete("/delete", adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete("/delete", auth_1.adminVerifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, description, price, imageLink, published } = req.body;
     const alreadyExists = yield db_1.Course.findOne({ title });
     if (alreadyExists) {

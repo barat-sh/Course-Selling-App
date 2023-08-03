@@ -14,27 +14,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = express_1.default.Router();
-const userSecret_key = "users3cr3tf0rjs0nw3bt0k3n";
 // importing db
 const db_1 = require("../models/db");
 router.get("/data", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const listofusers = yield db_1.User.find();
     res.send(listofusers);
 }));
-const generateToken = (payload) => {
-    return jsonwebtoken_1.default.sign(payload, userSecret_key);
-};
-const verifyPassword = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const isMatch = yield bcrypt_1.default.compare(password, hashedPassword);
-        return isMatch;
-    }
-    catch (error) {
-        return false;
-    }
-});
+// importing auth logins
+const auth_1 = require("../auth");
 router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password, name, phoneNumber, gender } = req.body;
     const alreadyExists = yield db_1.User.findOne({ username });
@@ -72,9 +60,9 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const alreadyExists = yield db_1.User.findOne({ username });
         if (alreadyExists === null || alreadyExists === void 0 ? void 0 : alreadyExists.password) {
-            const isMatch = yield verifyPassword(password, alreadyExists.password);
+            const isMatch = yield (0, auth_1.verifyPassword)(password, alreadyExists.password);
             if (isMatch) {
-                const token = yield generateToken({ id: alreadyExists.id });
+                const token = yield (0, auth_1.usergenerateToken)({ id: alreadyExists.id });
                 res.status(200).json({ message: "User Logged in...", token });
             }
             else {

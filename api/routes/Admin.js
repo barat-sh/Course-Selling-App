@@ -14,24 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = express_1.default.Router();
-const adminSecret_key = "admins3cr3tk3yf0rjs0nw3bt0k3n";
 // importing databases
 const db_1 = require("../models/db");
-const generateToken = (payload) => {
-    return jsonwebtoken_1.default.sign(payload, adminSecret_key);
-};
-const verifyPassword = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const isMatch = yield bcrypt_1.default.compare(password, hashedPassword);
-        return isMatch;
-    }
-    catch (error) {
-        console.error("Error", error);
-        return false;
-    }
-});
+// importing login auths
+const auth_1 = require("../auth");
 router.get("/allusers", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const listofUsers = yield db_1.User.find();
@@ -94,9 +81,9 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const alreadyExists = yield db_1.Admin.findOne({ username });
         if (alreadyExists === null || alreadyExists === void 0 ? void 0 : alreadyExists.password) {
-            const isMatch = yield verifyPassword(password, alreadyExists.password);
+            const isMatch = yield (0, auth_1.verifyPassword)(password, alreadyExists.password);
             if (isMatch) {
-                const token = generateToken({ id: alreadyExists.id });
+                const token = (0, auth_1.admingenerateToken)({ id: alreadyExists.id });
                 res.status(200).json({ message: "Admin Logged in...", token });
             }
             else {

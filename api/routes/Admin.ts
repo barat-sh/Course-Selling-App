@@ -2,26 +2,13 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const router = express.Router();
-const adminSecret_key = "admins3cr3tk3yf0rjs0nw3bt0k3n"
 
 // importing databases
 
 import {User,Admin,Course} from "../models/db";
 import { addSyntheticTrailingComment } from "typescript";
-
-const generateToken = (payload:object):string => {
-    return jwt.sign(payload,adminSecret_key)
-}
-
-const verifyPassword = async(password:string,hashedPassword:string) => {
-    try{
-        const isMatch = await bcrypt.compare(password,hashedPassword)
-        return isMatch
-    }catch(error){
-        console.error("Error",error)
-        return false
-    }   
-}
+// importing login auths
+import { verifyPassword,usergenerateToken, admingenerateToken } from "../auth";
 
 router.get("/allusers",async(req,res)=>{
     try{
@@ -83,7 +70,7 @@ router.post("/login",async(req,res)=>{
         if (alreadyExists?.password){
             const isMatch = await verifyPassword(password,alreadyExists.password)
             if (isMatch){
-                const token = generateToken({id:alreadyExists.id})
+                const token = admingenerateToken({id:alreadyExists.id})
                 res.status(200).json({message:"Admin Logged in...",token})
             }else{
                 res.status(404).json({message:"Incorrect Username or Password"})

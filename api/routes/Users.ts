@@ -2,7 +2,6 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const router = express.Router();
-const userSecret_key = "users3cr3tf0rjs0nw3bt0k3n"
 
 // importing db
 import {User} from "../models/db"
@@ -13,18 +12,9 @@ router.get("/data",async(req,res)=>{
     res.send(listofusers)
 })
 
-const generateToken = (payload:object):string => {
-    return jwt.sign(payload,userSecret_key)
-}
+// importing auth logins
+import { verifyPassword,usergenerateToken,admingenerateToken } from "../auth";
 
-const verifyPassword = async(password:string,hashedPassword:string)=>{
-    try{
-        const isMatch = await bcrypt.compare(password,hashedPassword)
-        return isMatch
-    }catch(error){
-        return false
-    }
-}
 
 router.post("/signup",async(req,res)=>{
     const {username,password,name,phoneNumber,gender} = req.body
@@ -64,7 +54,7 @@ router.post("/login",async(req,res)=>{
         if (alreadyExists?.password){
             const isMatch = await verifyPassword(password,alreadyExists.password)
             if (isMatch){
-                const token = await generateToken({id:alreadyExists.id})
+                const token = await usergenerateToken({id:alreadyExists.id})
                 res.status(200).json({message:"User Logged in...",token})
             }else{
                 res.status(404).json({message:"Incorrect Username or Password"})
