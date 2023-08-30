@@ -6,7 +6,6 @@ const router = express.Router();
 // importing databases
 
 import {User,Admin,Course} from "../models/db";
-import { addSyntheticTrailingComment } from "typescript";
 // importing login auths
 import { verifyPassword,usergenerateToken, admingenerateToken } from "../auth";
 
@@ -84,4 +83,18 @@ router.post("/login",async(req,res)=>{
 })
 
 
+router.post("/",(req,res)=>{
+  const input = req.body;
+  const alreadyExists = await Admi
+})
+
+
+
+
+
+
 export default router;
+
+
+
+

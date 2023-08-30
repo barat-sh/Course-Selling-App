@@ -8,11 +8,6 @@ import {Course} from "../models/db";
 // importing auths
 import {adminVerifyToken,userVerifyToken} from "../auth"
 
-// list all course -> user & admin access
-router.get("/list",userVerifyToken || adminVerifyToken,async(req,res): Promise<void>=>{
-    const listofCourses = await Course.find();
-    res.status(200).json({message:"Success",listofCourses})
-})
 
 
 // add new Course -> admin access
@@ -54,13 +49,29 @@ router.delete("/delete",adminVerifyToken,async(req,res)=>{
     }else{
         res.status(403).json({message:"Course not found..."})
     }
-    // Course.deleteOne({title},(err:any): void=>{
-    //     if (err){
-    //         res.status(403).json({message:"Error while deleting course.."})
-    //     }else{
-    //         res.status(200).json({message:"Course Deleted..."})
-    //     }
-    // })
+})
+
+
+// list all course -> user & admin access
+router.get("/list",userVerifyToken || adminVerifyToken,async(req,res): Promise<void>=>{
+    const listofCourses = await Course.find();
+    res.status(200).json({message:"Success",listofCourses})
+})
+
+
+router.get("/list/:id",userVerifyToken || adminVerifyToken,async(req,res): Promise<void>=>{
+    try{
+        const id:any = await Object(req.params as { id: string }).id;
+        const alreadyExists = await Course.findOne({_id:id});
+        if (alreadyExists){
+            res.status(200).json({message:"Success",alreadyExists})
+        }else{
+            res.status(200).json({message:"No COurse Found"})
+        }
+    }catch(error){
+        res.status(403).json({message:"error",error})
+    }
+
 })
 
 export default router;

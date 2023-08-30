@@ -62,11 +62,11 @@ exports.verifyPassword = verifyPassword;
 const adminVerifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const token = req.headers;
     try {
-        const isMatch = yield jsonwebtoken_1.default.verify(token, adminSecret_key);
+        const isMatch = jsonwebtoken_1.default.verify(token, adminSecret_key);
         return isMatch;
     }
     catch (error) {
-        console.log("Error while creating token");
+        console.log("Error while checking token");
         return false;
     }
     finally {
@@ -78,11 +78,11 @@ exports.adminVerifyToken = adminVerifyToken;
 const userVerifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const token = req.headers;
     try {
-        const isMatch = yield jsonwebtoken_1.default.verify(token, userSecret_key);
+        const isMatch = jsonwebtoken_1.default.verify(token, userSecret_key);
         return isMatch;
     }
     catch (error) {
-        console.log("Error while creating token");
+        console.log("Error while checking token");
         return false;
     }
     finally {

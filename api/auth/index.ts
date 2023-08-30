@@ -48,10 +48,10 @@ export const verifyPassword = async(password:string,hashedPassword:string) => {
 export const adminVerifyToken = async(req: { headers: any; },res: any,next: () => void) => {
     const token = req.headers
     try{
-        const isMatch = await jwt.verify(token,adminSecret_key)
+        const isMatch = jwt.verify(token,adminSecret_key)
         return isMatch
     }catch(error){
-        console.log("Error while creating token")
+        console.log("Error while checking token")
         return false
     }finally{
         next()
@@ -62,10 +62,10 @@ export const adminVerifyToken = async(req: { headers: any; },res: any,next: () =
 export const userVerifyToken = async(req: { headers: any; },res: any,next: () => void) => {
     const token = req.headers
     try{
-        const isMatch = await jwt.verify(token,userSecret_key)
+        const isMatch = jwt.verify(token,userSecret_key)
         return isMatch
     }catch(error){
-        console.log("Error while creating token")
+        console.log("Error while checking token")
         return false
     }finally{
         next()
